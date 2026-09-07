@@ -11,7 +11,7 @@
 | 축구공·골대·벤치·타격 효과 | 동적으로 그리는 게임 오브젝트 | 이 프로젝트의 Canvas 코드 |
 | 효과음 | 슛·피격·점프 등 짧은 합성음 | 이 프로젝트의 Web Audio 코드, 기본 꺼짐 |
 
-Galmuri 공식 배포처: [quiple/galmuri](https://github.com/quiple/galmuri), [SIL OFL 라이선스](https://github.com/quiple/galmuri/blob/main/ofl.md). 로컬 설치 시 원문은 `node_modules/galmuri/ofl.md`에 있습니다. 번들에는 사용하는 WOFF2 한 파일만 포함하며 CPU 캡처는 같은 패키지의 TTF를 읽습니다.
+Galmuri 공식 배포처: [quiple/galmuri](https://github.com/quiple/galmuri), [동봉한 SIL OFL 라이선스](../public/licenses/Galmuri-OFL.md). npm 패키지의 저작권 고지와 라이선스를 `public/licenses/`에 포함하여 빌드 산출물에도 복사합니다. 번들에는 사용하는 WOFF2 한 파일만 포함하며 CPU 캡처는 같은 패키지의 TTF를 읽습니다.
 
 생성 결과 중 최초 아틀라스에 배경이 들어갔기 때문에 built-in 도구에 배경만 단색 cyan으로 바꾸는 편집을 요청했습니다. 런타임 `keyChroma`는 선택한 cyan 범위만 투명화하고, `PLAYER_FRAMES` / `CAST_FRAMES`는 검토한 개별 프레임 경계를 지정합니다. 포즈 그림을 자동 보간한 원형 토큰으로 바꾸지 않습니다.
 
