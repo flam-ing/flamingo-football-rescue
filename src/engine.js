@@ -89,11 +89,13 @@ function updateEnemy(g,e,dt){
  e.x=clamp(e.x,40,STAGES[g.stage].length-80);
 }
 export function step(g,input={},dt=1/60){
- if(g.mode!=='playing')return;
- dt=clamp(Number.isFinite(dt)?dt:0,0,.05);if(!dt)return;
- g.events=[];if(g.freeze>0){g.freeze-=dt;return;}
+ // Return whether this tick reached input consumption. Hitstop must not discard
+ // a key press already queued by the browser between animation frames.
+ if(g.mode!=='playing')return false;
+ dt=clamp(Number.isFinite(dt)?dt:0,0,.05);if(!dt)return false;
+ g.events=[];if(g.freeze>0){g.freeze-=dt;return false;}
  const p=g.player,s=STAGES[g.stage];g.totalTime+=dt;g.stageTime+=dt;if(!g.practice)g.time=Math.max(0,g.time-dt);
- if(g.time===0){g.mode='lost';g.reason='시간이 끝났어요! 다음에는 동료 호출로 포위망을 빠르게 돌파해 보세요.';return;}
+ if(g.time===0){g.mode='lost';g.reason='시간이 끝났어요! 다음에는 동료 호출로 포위망을 빠르게 돌파해 보세요.';return true;}
  p.invuln=Math.max(0,p.invuln-dt);p.cooldown=Math.max(0,p.cooldown-dt);p.actionTime+=dt;
  if(p.actionTime>=p.actionDuration&&!['idle','run','jump'].includes(p.action)){act(p,p.y>0?'jump':'idle',0);}
  const controllable=!['hurt','tackle'].includes(p.action);const move=(input.right?1:0)-(input.left?1:0);
@@ -132,6 +134,7 @@ export function step(g,input={},dt=1/60){
  g.comboTime-=dt;if(g.comboTime<=0)g.combo=0;
  g.camera=toward(g.camera,clamp(p.x-W*.34,0,s.length-W),900*dt);g.shake=Math.max(0,g.shake-dt*20);
  for(const e of g.effects){e.life-=dt;if(e.kind==='text')e.y+=dt*30;}g.effects=g.effects.filter(e=>e.life>0);
+ return true;
 }
 export function describe(g){
  const stage=STAGES[g.stage];return `${g.practice?'훈련':'작전 '+(g.stage+1)} · 에너지 ${Math.ceil(g.player.hp)} · 남은 적 ${remaining(g)} · 응원 ${Math.floor(g.cheer)} · 점수 ${g.score} · ${Number.isFinite(g.time)?Math.ceil(g.time)+'초':'시간 제한 없음'} · ${stage.goal}`;

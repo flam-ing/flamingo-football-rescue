@@ -1,14 +1,16 @@
 import './style.css';
-import {createGame,startGame,step,togglePause,nextStage,STAGES,describe} from './engine.js';
+import {createGame,startGame,togglePause,nextStage,STAGES,describe} from './engine.js';
+import {InputBuffer} from './input.js';
 import {render,keyChroma} from './render.js';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d');
-let game=createGame(),assets={},held=new Set(),edges=new Set(),frame=0,last=0,acc=0,previousMode='',sound=false,audio=null,helpPaused=false;
+const inputBuffer=new InputBuffer();
+let game=createGame(),assets={},held=inputBuffer.held,edges=inputBuffer.edges,frame=0,last=0,acc=0,previousMode='',sound=false,audio=null,helpPaused=false;
 game.mode='title';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const keyMap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',KeyZ:'tackle',KeyJ:'tackle',KeyX:'kick',KeyK:'kick',KeyC:'special',KeyL:'special'};
 const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('원화 로딩 실패: '+src));img.src=src;});
-function clearInput(){held.clear();edges.clear();document.querySelectorAll('[data-hold]').forEach(el=>el.removeAttribute('aria-pressed'));}
-function press(action){if(game.mode!=='playing')return;if(!held.has(action))edges.add(action);held.add(action);}
+function clearInput(){inputBuffer.clear();document.querySelectorAll('[data-hold]').forEach(el=>el.removeAttribute('aria-pressed'));}
+function press(action){if(game.mode!=='playing')return;inputBuffer.press(action);}
 function soundCue(type){if(!sound)return;try{audio??=new AudioContext();if(audio.state==='suspended')audio.resume();const o=audio.createOscillator(),v=audio.createGain();o.connect(v);v.connect(audio.destination);const f={kick:170,hit:100,hurt:75,goal:660,win:880,jump:350,special:490,tackle:130,start:550}[type];if(!f)return;o.type=type==='hit'?'square':'triangle';o.frequency.setValueAtTime(f,audio.currentTime);o.frequency.exponentialRampToValueAtTime(f*1.4,audio.currentTime+.08);v.gain.setValueAtTime(.035,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);o.start();o.stop(audio.currentTime+.17);}catch{sound=false;$('sound').textContent='소리 사용할 수 없음';}}
 function panels(){
  const m=game.mode;$('menu').classList.toggle('hidden',m!=='title');$('pause-panel').classList.toggle('hidden',m!=='paused');$('results').classList.toggle('hidden',!['won','lost'].includes(m));$('brief').classList.toggle('hidden',!['brief','stageclear'].includes(m));$('pause').disabled=!['playing','paused'].includes(m);$('pause').textContent=m==='paused'?'계속':'일시정지';
@@ -41,7 +43,7 @@ for(const b of document.querySelectorAll('[data-hold],[data-action]')){
 function backgroundPause(){clearInput();if(game.mode==='playing'){game.mode='paused';panels();}}
 window.addEventListener('blur',backgroundPause);document.addEventListener('visibilitychange',()=>{if(document.hidden)backgroundPause();last=0;acc=0;});
 function tick(now){const elapsed=last?Math.min((now-last)/1000,.1):0;last=now;acc+=elapsed;
- while(acc>=1/60){const input={left:held.has('left'),right:held.has('right'),jump:edges.has('jump'),tackle:edges.has('tackle'),kick:edges.has('kick'),special:edges.has('special')};step(game,input,1/60);edges.clear();acc-=1/60;for(const event of game.events)soundCue(event.type);game.events=[];}
+ while(acc>=1/60){inputBuffer.step(game,1/60);acc-=1/60;for(const event of game.events)soundCue(event.type);game.events=[];}
  render(ctx,game,assets,{reducedMotion:reduced});if(game.mode!==previousMode||Math.floor(now/300)!==Math.floor((now-elapsed*1000)/300))panels();frame=requestAnimationFrame(tick);
 }
 $('start').disabled=true;$('practice').disabled=true;$('status').textContent='경기장과 선수 원화를 불러오는 중…';
