@@ -47,5 +47,5 @@ function tick(now){const elapsed=last?Math.min((now-last)/1000,.1):0;last=now;ac
  render(ctx,game,assets,{reducedMotion:reduced});if(game.mode!==previousMode||Math.floor(now/300)!==Math.floor((now-elapsed*1000)/300))panels();frame=requestAnimationFrame(tick);
 }
 $('start').disabled=true;$('practice').disabled=true;$('status').textContent='경기장과 선수 원화를 불러오는 중…';
-Promise.all([load('/art/player-atlas.png'),load('/art/cast-atlas.png'),load('/art/stadium.png'),document.fonts.ready]).then(([player,cast,stadium])=>{assets={player:keyChroma(document.createElement('canvas'),player),cast:keyChroma(document.createElement('canvas'),cast),stadium};$('start').disabled=false;$('practice').disabled=false;panels();frame=requestAnimationFrame(tick);}).catch(error=>{$('status').textContent=error.message+' 새로고침해주세요.';});
+Promise.all([load('./art/player-atlas.png'),load('./art/cast-atlas.png'),load('./art/stadium.png'),document.fonts.ready]).then(([player,cast,stadium])=>{assets={player:keyChroma(document.createElement('canvas'),player),cast:keyChroma(document.createElement('canvas'),cast),stadium};$('start').disabled=false;$('practice').disabled=false;panels();frame=requestAnimationFrame(tick);}).catch(error=>{$('status').textContent=error.message+' 새로고침해주세요.';});
 if(import.meta.hot)import.meta.hot.dispose(()=>cancelAnimationFrame(frame));
